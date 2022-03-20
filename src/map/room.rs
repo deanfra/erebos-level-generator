@@ -11,7 +11,7 @@ pub struct Room {
   pub min_doors: u32,
   pub room_type: RoomType,
   /// The XY coords for each used door
-  pub doors_xy: DoorsXY,
+  pub door_connections: DoorConnections,
   /// The XY coords for each possible door
   pub possible_doors_xy: DoorsXY,
   pub tiles: Vec<u8>,
@@ -19,11 +19,18 @@ pub struct Room {
 }
 
 impl Room {
-  pub fn add_door(&mut self, door_type: u8, xy: XY) {
-    if let Some(doors) = self.doors_xy.get_mut(&door_type) {
-      doors.push(xy);
+  pub fn add_door(&mut self, node_a_idx: usize, node_b_idx: usize, door_type: u8, xy: XY, dir: bool) {
+    let connection = DoorConnection {
+      node_a_idx,
+      node_b_idx,
+      xy,
+      direction: dir,
+    };
+
+    if let Some(doors) = self.door_connections.get_mut(&door_type) {
+      doors.push(connection);
     } else {
-      self.doors_xy.insert(door_type, Vec::from([xy]));
+      self.door_connections.insert(door_type, Vec::from([connection]));
     }
 
     let idx = xy_idx(xy.0 - 1, xy.1 - 1, self.w);
@@ -45,18 +52,34 @@ impl Default for RoomType {
   }
 }
 
-type RoomMap = HashMap<usize, Room>;
+/// Hashmap of each room template
+type RoomTemplateMap = HashMap<usize, Room>;
+/// Hashmap of each door type and their connections
+pub type DoorConnections = HashMap<u8, Vec<DoorConnection>>;
+/// A struct to represent how two rooms connect
+#[derive(Clone)]
+pub struct DoorConnection {
+  /// The node index of the current room
+  pub node_a_idx: usize,
+  /// The node index of the target room
+  pub node_b_idx: usize,
+  /// XY Coordinates
+  xy: XY,
+  /// Direction of the connection - true = A->B | false = B->A
+  pub direction: bool,
+}
+
 pub type DoorsXY = HashMap<u8, Vec<XY>>;
 /// Params: Tiles with room places, x, y coordinates of the room
 type TemporaryCanvas = (Vec<u8>, i32, i32);
 
 pub struct Rooms {
-  pub rooms: RoomMap,
+  pub rooms: RoomTemplateMap,
 }
 
 impl Rooms {
   pub fn new() -> Rooms {
-    let mut rooms: RoomMap = HashMap::new();
+    let mut rooms: RoomTemplateMap = HashMap::new();
 
     for (num, template) in Vec::from([
       room_templates::bent_l(),
@@ -105,7 +128,7 @@ impl Rooms {
 }
 
 /// precalculate valid XY positions of all door combinations, these get randomly used when crawling through the original level graph
-fn calculate_combinations(rooms: &mut RoomMap) {
+fn calculate_combinations(rooms: &mut RoomTemplateMap) {
   let rooms_b = rooms.clone();
   // For each room
   for (_, room_a) in rooms.iter_mut() {

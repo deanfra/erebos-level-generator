@@ -27,6 +27,8 @@ fn main() {
 
   // debug
   // debug::print_er_diagram(&map_graph.graph, &map_graph.nodes);
+  // debug::print_plantuml_map(&map_graph.graph, &map);
+  // debug::print_plantuml_nodes(&map_graph.graph, &map_graph.nodes);
   debug::print_map(map.tiles, map.width);
   // debug::print_map_history(map.history, map.width);
 
@@ -64,12 +66,8 @@ fn try_node_recursive(
   // For each node
   for (neighbour_1, neighbour_2) in neighbours {
     // Neighbours can go both ways
-    let node_b = if neighbour_1.index() == node_a_idx {
-      neighbour_2
-    } else {
-      neighbour_1
-    };
-
+    let a_to_b = neighbour_1.index() == node_a_idx;
+    let node_b = if a_to_b { neighbour_2 } else { neighbour_1 };
     let node_b_idx = &node_b.index();
 
     // Stop at an existing node (TODO: try connect rooms?)
@@ -121,8 +119,8 @@ fn try_node_recursive(
         if room_is_correct_weight && has_min_doors && map.can_place_room(&mut room_b, door_b_type) {
           // Add door references to room
           // TODO: Traverse all existing rooms and attempt to optimise for more connections and more rooms?
-          room_a.add_door(door_a_type, door_a_xy);
-          room_b.add_door(door_b_type, door_b_xy);
+          room_a.add_door(node_a_idx, *node_b_idx, door_a_type, door_a_xy, a_to_b);
+          room_b.add_door(*node_b_idx, node_a_idx, door_b_type, door_b_xy, !a_to_b);
 
           // update rooms with the new door
           map.add_or_update_room(node_b_idx.clone(), room_b.clone());

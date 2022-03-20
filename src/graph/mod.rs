@@ -22,6 +22,7 @@ pub struct MapGraph {
 
 pub fn random_graph() -> MapGraph {
   let mut rng = rand::thread_rng();
+  // let selection: u32 = 7;
   let selection: u32 = rng.gen_range(1..8);
 
   match selection {
@@ -69,10 +70,10 @@ pub fn random_graph() -> MapGraph {
       directed_hexagonal_lattice_graph::new(rows, cols, false)
     }
     7 => {
-      let num_nodes: usize = rng.gen_range(8..20);
-      let shift: usize = rng.gen_range(1..4);
-      println!("generalized_petersen_graph");
-      generalized_petersen_graph::new(num_nodes, shift)
+      let shift: usize = rng.gen_range(3..6);
+      let num: usize = shift * 2 + 1;
+      println!("generalized_petersen_graph - nodes:{} shift:{}", num, shift);
+      generalized_petersen_graph::new(num, shift)
     }
     _ => {
       println!("random_matrix");

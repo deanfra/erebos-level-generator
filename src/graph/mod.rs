@@ -6,10 +6,7 @@ pub mod directed_heavy_square_graph;
 pub mod directed_hexagonal_lattice_graph;
 pub mod generalized_petersen_graph;
 pub mod random_matrix;
-use petgraph::{
-  stable_graph::{NodeIndex, StableGraph},
-  visit::IntoNodeReferences,
-};
+use petgraph::stable_graph::{NodeIndex, StableGraph};
 use rand::Rng;
 use std::collections::HashMap;
 

@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 
 /// Generate an undirected hexagonal lattice graph.
@@ -24,7 +24,7 @@ use petgraph::stable_graph::{NodeIndex, StableGraph};
 ///   graph = retworkx.generators.hexagonal_lattice_graph(2, 2)
 ///   mpl_draw(graph)
 ///
-pub fn new(rows: usize, cols: usize, bidirectional: bool) -> MapGraph {
+pub fn new(rows: usize, cols: usize, bidirectional: bool) -> GraphResult {
   let mut graph = StableGraph::<usize, usize>::new();
 
   let mut rowlen = rows;
@@ -104,5 +104,5 @@ pub fn new(rows: usize, cols: usize, bidirectional: bool) -> MapGraph {
     *nw = i + 1;
   }
 
-  MapGraph { graph, nodes }
+  (graph, nodes)
 }

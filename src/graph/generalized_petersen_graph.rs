@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 
 /// Generate a generalized Petersen graph :math:`G(n, k)` with :math:`2n`
@@ -17,7 +17,7 @@ use petgraph::stable_graph::{NodeIndex, StableGraph};
 ///
 /// :returns: The generated generalized Petersen graph.
 
-pub fn new(num_nodes: usize, shift: usize) -> MapGraph {
+pub fn new(num_nodes: usize, shift: usize) -> GraphResult {
   if num_nodes < 3 {
     println!("num_nodes must be at least 3");
   }
@@ -55,5 +55,5 @@ pub fn new(num_nodes: usize, shift: usize) -> MapGraph {
     *nw = i + 1;
   }
 
-  MapGraph { graph, nodes }
+  (graph, nodes)
 }

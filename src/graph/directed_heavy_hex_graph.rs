@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::{GraphResult, };
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 
 /// Generate a directed heavy hex graph. Fig. 2 of
@@ -73,7 +73,7 @@ use petgraph::stable_graph::{NodeIndex, StableGraph};
 ///   image
 ///
 
-pub fn new(distance: usize, bidirectional: bool) -> MapGraph {
+pub fn new(distance: usize, bidirectional: bool) -> GraphResult {
   let mut graph = StableGraph::<usize, usize>::default();
 
   if distance % 2 == 0 {
@@ -83,7 +83,7 @@ pub fn new(distance: usize, bidirectional: bool) -> MapGraph {
   if distance == 1 {
     let node = graph.add_node(0);
     let nodes = Vec::from([node]);
-    return MapGraph { graph, nodes };
+    return (graph, nodes);
   }
 
   let num_data = distance * distance;
@@ -189,5 +189,5 @@ pub fn new(distance: usize, bidirectional: bool) -> MapGraph {
     *nw = i + 1;
   }
 
-  MapGraph { graph, nodes }
+  (graph, nodes)
 }

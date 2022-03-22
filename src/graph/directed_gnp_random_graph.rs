@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 use rand::distributions::{Distribution, Uniform};
 
@@ -31,7 +31,7 @@ use rand::distributions::{Distribution, Uniform};
 ///    "Efficient generation of large random networks",
 ///    Phys. Rev. E, 71, 036113, 2005.
 /// .. [2] https://github.com/networkx/networkx/blob/networkx-2.4/networkx/generators/random_graphs.py#L49-L120
-pub fn new(num_nodes: isize, probability: f64) -> MapGraph {
+pub fn new(num_nodes: isize, probability: f64) -> GraphResult {
   if num_nodes <= 0 {
     println!("num_nodes must be > 0");
   }
@@ -103,5 +103,5 @@ pub fn new(num_nodes: isize, probability: f64) -> MapGraph {
     *nw = i + 1;
   }
 
-  MapGraph { graph: inner_graph, nodes }
+  (inner_graph, nodes)
 }

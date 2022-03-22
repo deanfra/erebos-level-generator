@@ -6,25 +6,24 @@ pub mod directed_heavy_square_graph;
 pub mod directed_hexagonal_lattice_graph;
 pub mod generalized_petersen_graph;
 pub mod random_matrix;
-use petgraph::{
-  stable_graph::{NodeIndex, StableGraph},
-  visit::IntoNodeReferences,
-};
+use petgraph::stable_graph::{NodeIndex, StableGraph};
 use rand::Rng;
 use std::collections::HashMap;
 
-pub type NeighbourMap = HashMap<usize, Vec<(NodeIndex<u32>, NodeIndex<u32>)>>;
+type NeighbourMap = HashMap<usize, Vec<(NodeIndex<u32>, NodeIndex<u32>)>>;
+pub type GraphResult = (StableGraph<usize, usize>, Vec<NodeIndex<u32>>);
 
 pub struct MapGraph {
   pub graph: StableGraph<usize, usize>,
   pub nodes: Vec<NodeIndex<u32>>,
+  pub neighbours: NeighbourMap,
 }
 
 pub fn random_graph() -> MapGraph {
   let mut rng = rand::thread_rng();
   let selection: u32 = rng.gen_range(1..8);
 
-  match selection {
+  let (graph, nodes) = match selection {
     1 => {
       let mesh_nodes: usize = rng.gen_range(5..10);
       let path_nodes: usize = rng.gen_range(4..10);
@@ -69,24 +68,28 @@ pub fn random_graph() -> MapGraph {
       directed_hexagonal_lattice_graph::new(rows, cols, false)
     }
     7 => {
-      let num_nodes: usize = rng.gen_range(8..20);
-      let shift: usize = rng.gen_range(1..4);
-      println!("generalized_petersen_graph");
-      generalized_petersen_graph::new(num_nodes, shift)
+      let shift: usize = rng.gen_range(3..6);
+      let num: usize = shift * 2 + 1;
+      println!("generalized_petersen_graph - nodes:{} shift:{}", num, shift);
+      generalized_petersen_graph::new(num, shift)
     }
     _ => {
       println!("random_matrix");
       random_matrix::new()
     }
-  }
+  };
+
+  let neighbours = create_neighbour_map((graph.clone(), nodes.clone()));
+
+  MapGraph { graph, nodes, neighbours }
 }
 
 /// For each node, store the directional neighbours (incoming and outgoing)
-pub fn create_neighbour_map(map_graph: &MapGraph) -> NeighbourMap {
+fn create_neighbour_map((graph, nodes): GraphResult) -> NeighbourMap {
   let mut neighbour_map: NeighbourMap = HashMap::new();
 
-  for node_a in map_graph.nodes.iter() {
-    for node_b in map_graph.graph.neighbors(*node_a) {
+  for node_a in nodes.iter() {
+    for node_b in graph.neighbors(*node_a) {
       // A->B
       if let Some(neighbours) = neighbour_map.get_mut(&node_a.index()) {
         neighbours.push((*node_a, node_b));

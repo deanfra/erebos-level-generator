@@ -1,19 +1,15 @@
-pub mod room;
-pub mod room_templates;
-
 use super::{
   common::{xy_idx, XY},
   debug,
 };
-use room::{DoorsXY, Room, RoomType, Rooms};
+pub mod room;
+use room::{DoorsXY, Room, RoomType};
+pub mod room_template_definitions;
+use room_templates::RoomTemplates;
+pub mod room_templates;
 use std::collections::HashMap;
 
 const DEBUG: bool = false;
-
-#[derive(Clone)]
-pub enum TileType {
-  // Wall,BG,Door,
-}
 
 pub struct Map {
   pub tiles: Vec<u8>,
@@ -35,91 +31,91 @@ impl Map {
       history: vec![],
     }
   }
+}
 
-  pub fn add_or_update_room(&mut self, node_idx: usize, room: Room) {
-    // start at x,y in the map
-    let is_new_room = !self.rooms.contains_key(&node_idx);
-    let mut idx = xy_idx(room.x, room.y, self.width);
-    let mut x = 1;
+pub fn add_or_update_room(map: &mut Map, node_idx: usize, room: Room) {
+  // start at x,y in the map
+  let is_new_room = !map.rooms.contains_key(&node_idx);
+  let mut idx = xy_idx(room.x, room.y, map.width);
+  let mut x = 1;
 
-    for tile in room.tiles.iter() {
-      // if this tile overlaps
-      if is_new_room && *tile != 0 && idx <= self.tiles.len() && self.tiles[idx] == 8 {
-        self.tiles[idx] = 9; // 9 = clash
-      } else if *tile != 0 && idx <= self.tiles.len() {
-        self.tiles[idx] = *tile;
-      }
-
-      // end of the row, move down one and back to the left
-      if x == room.w {
-        x = 1;
-        idx += (self.width - room.w + 1) as usize;
-      } else {
-        idx += 1;
-        x += 1;
-      }
+  for tile in room.tiles.iter() {
+    // if this tile overlaps
+    if is_new_room && *tile != 0 && idx <= map.tiles.len() && map.tiles[idx] == 8 {
+      map.tiles[idx] = 9; // 9 = clash
+    } else if *tile != 0 && idx <= map.tiles.len() {
+      map.tiles[idx] = *tile;
     }
 
-    // println!("Add room: node #{}", node_idx);
-    // debug::print_map(self.tiles.clone(), self.width);
-    self.history.push(self.tiles.clone());
-    self.rooms.insert(node_idx, room);
+    // end of the row, move down one and back to the left
+    if x == room.template.w {
+      x = 1;
+      idx += (map.width - room.template.w + 1) as usize;
+    } else {
+      idx += 1;
+      x += 1;
+    }
   }
 
-  pub fn can_place_room(&self, room: &mut Room, door_type: u8) -> bool {
-    // start at x,y in the map
-    let mut idx = xy_idx(room.x, room.y, self.width);
-    let mut x = 1;
-    let mut can_place = true;
-    let mut test_area = self.tiles.clone();
+  // println!("Add room: node #{}", node_idx);
+  // debug::print_map(map.tiles.clone(), map.width);
+  map.history.push(map.tiles.clone());
+  map.rooms.insert(node_idx, room);
+}
 
-    for tile in room.tiles.iter() {
-      let in_range = idx < self.tiles.len();
-      let is_tile = *tile != 0;
-      let tile_overlaps_another = in_range && is_tile && self.tiles[idx] != 0;
-      let crosses_side_of_map = room_crosses_side_of_map(idx, *tile, door_type, self.width as usize, self.tiles.len());
+pub fn can_place_room(map: &Map, room: &mut Room, door_type: u8) -> bool {
+  // start at x,y in the map
+  let mut idx = xy_idx(room.x, room.y, map.width);
+  let mut x = 1;
+  let mut can_place = true;
+  let mut test_area = map.tiles.clone();
 
-      let has_conflicts = !in_range || tile_overlaps_another || crosses_side_of_map;
+  for tile in room.tiles.iter() {
+    let in_range = idx < map.tiles.len();
+    let is_tile = *tile != 0;
+    let tile_overlaps_another = in_range && is_tile && map.tiles[idx] != 0;
+    let crosses_side_of_map = room_crosses_side_of_map(idx, *tile, door_type, map.width as usize, map.tiles.len());
 
-      // if this tile overlaps
-      if has_conflicts {
-        // Debug: print every tile conflict with a red mark + reason
-        if DEBUG {
-          let reason = match (!in_range, tile_overlaps_another, crosses_side_of_map) {
-            (true, false, false) => "Out of range".to_string(),
-            (false, true, false) => format!("Tile overlaps another: {} {}", *tile, self.tiles[idx]),
-            (false, false, true) => "Room crosses the map edge".to_string(),
-            _ => "".to_string(),
-          };
+    let has_conflicts = !in_range || tile_overlaps_another || crosses_side_of_map;
 
-          test_area[idx] = 9;
-          println!("CONFLICT - i:{}, reason:{}", idx, reason);
-          debug::print_map(test_area.clone(), self.width);
-        }
-        // end debug
+    // if this tile overlaps
+    if has_conflicts {
+      // Debug: print every tile conflict with a red mark + reason
+      if DEBUG {
+        let reason = match (!in_range, tile_overlaps_another, crosses_side_of_map) {
+          (true, false, false) => "Out of range".to_string(),
+          (false, true, false) => format!("Tile overlaps another: {} {}", *tile, map.tiles[idx]),
+          (false, false, true) => "Room crosses the map edge".to_string(),
+          _ => "".to_string(),
+        };
 
-        can_place = false;
-        break;
-      } else {
-        test_area[idx] = *tile;
+        test_area[idx] = 9;
+        println!("CONFLICT - i:{}, reason:{}", idx, reason);
+        debug::print_map(test_area.clone(), map.width);
       }
+      // end debug
 
-      // end of the row, move down one and back to the left
-      if x == room.w {
-        x = 1;
-        idx += (self.width - room.w + 1) as usize;
-      } else {
-        idx += 1;
-        x += 1;
-      }
+      can_place = false;
+      break;
+    } else {
+      test_area[idx] = *tile;
     }
 
-    if can_place && DEBUG {
-      debug::print_map(test_area.clone(), self.width);
+    // end of the row, move down one and back to the left
+    if x == room.template.w {
+      x = 1;
+      idx += (map.width - room.template.w + 1) as usize;
+    } else {
+      idx += 1;
+      x += 1;
     }
-
-    can_place
   }
+
+  if can_place && DEBUG {
+    debug::print_map(test_area.clone(), map.width);
+  }
+
+  can_place
 }
 
 /// Check if the door or the background crosses the edge of the map
@@ -164,10 +160,11 @@ fn room_crosses_side_of_map(idx: usize, tile: u8, door_type: u8, width: usize, l
   }
 }
 
-pub fn find_or_create_start_room(map: &mut Map, templates: &mut Rooms, idx: &usize) -> Room {
-  let fetch_start_rooms = templates.of_type(RoomType::Start);
-  let (_, start_room) = fetch_start_rooms.get(0).unwrap();
+pub fn find_or_create_start_room(map: &mut Map, templates: &mut RoomTemplates, idx: &usize) -> Room {
+  let start_room_templates = templates.of_type(RoomType::Start);
+  let (_, start_room_template) = start_room_templates.get(0).unwrap().clone();
+  let start_room = Room::new(start_room_template.clone());
 
-  let found_room = map.rooms.get(idx).unwrap_or(start_room);
+  let found_room = map.rooms.get(idx).unwrap_or(&start_room);
   found_room.clone()
 }

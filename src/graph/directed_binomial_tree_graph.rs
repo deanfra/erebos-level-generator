@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 use petgraph::visit::EdgeRef;
 use petgraph::visit::IntoEdgeReferences;
@@ -31,7 +31,7 @@ use petgraph::visit::IntoEdgeReferences;
 ///   mpl_draw(graph)
 ///
 
-pub fn new(order: u32, bidirectional: bool) -> MapGraph {
+pub fn new(order: u32, bidirectional: bool) -> GraphResult {
   let num_nodes = usize::pow(2, order);
   let num_edges = usize::pow(2, order) - 1;
   let mut graph = StableGraph::<usize, usize>::with_capacity(num_nodes, num_edges);
@@ -72,5 +72,5 @@ pub fn new(order: u32, bidirectional: bool) -> MapGraph {
     n *= 2;
   }
 
-  MapGraph { graph, nodes }
+  (graph, nodes)
 }

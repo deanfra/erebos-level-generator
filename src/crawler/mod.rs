@@ -9,17 +9,16 @@ use rand::prelude::{SliceRandom, ThreadRng};
 pub fn try_node_recursive(
   base_node: &NodeIndex<u32>,
   map_graph: &graph::MapGraph,
-  neighbour_map: &graph::NeighbourMap,
   map: &mut map::Map,
   templates: &mut RoomTemplates,
   rng: &mut ThreadRng,
 ) {
-  let graph::MapGraph { graph, nodes } = map_graph;
+  let graph::MapGraph { graph, nodes, neighbours } = map_graph;
   let node_a_idx = base_node.index();
 
   // Should only create on first node
   let mut room_a = map::find_or_create_start_room(map, templates, &node_a_idx);
-  let neighbours = neighbour_map.get(&base_node.index()).unwrap();
+  let neighbour = neighbours.get(&base_node.index()).unwrap();
 
   let weights = graph.node_weights().collect::<Vec<&usize>>();
   let _weight = weights.get(node_a_idx).unwrap();
@@ -32,7 +31,7 @@ pub fn try_node_recursive(
   }
 
   // For each node
-  for (neighbour_1, neighbour_2) in neighbours {
+  for (neighbour_1, neighbour_2) in neighbour {
     // Neighbours can go both ways
     let a_to_b = neighbour_1.index() == node_a_idx;
     let node_b = if a_to_b { neighbour_2 } else { neighbour_1 };
@@ -102,7 +101,7 @@ pub fn try_node_recursive(
 
     // if this random room can be placed, try this room's connecting nodes
     if room_added {
-      try_node_recursive(&node_b, map_graph, neighbour_map, map, templates, rng);
+      try_node_recursive(&node_b, map_graph, map, templates, rng);
     }
   }
 }

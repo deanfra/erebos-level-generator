@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 use petgraph::visit::EdgeRef;
 use petgraph::visit::IntoEdgeReferences;
@@ -36,7 +36,7 @@ use std::iter;
 ///   mpl_draw(graph)
 ///
 
-pub fn new(num_mesh_nodes: usize, num_path_nodes: usize) -> MapGraph {
+pub fn new(num_mesh_nodes: usize, num_path_nodes: usize) -> GraphResult {
   let mut left_mesh = StableGraph::<usize, usize>::default();
   let mut mesh_nodes: Vec<NodeIndex> = (0..num_mesh_nodes).map(|w| left_mesh.add_node(w)).collect();
   let mut nodelen = mesh_nodes.len();
@@ -85,7 +85,7 @@ pub fn new(num_mesh_nodes: usize, num_path_nodes: usize) -> MapGraph {
     *nw = i;
   }
 
-  MapGraph { graph: left_mesh, nodes }
+  (left_mesh, nodes)
 }
 
 pub fn pairwise<I>(right: I) -> impl Iterator<Item = (Option<I::Item>, I::Item)>

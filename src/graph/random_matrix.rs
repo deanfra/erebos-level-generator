@@ -1,4 +1,4 @@
-use super::MapGraph;
+use super::GraphResult;
 use petgraph::stable_graph::{NodeIndex, StableGraph};
 use petgraph::visit::EdgeRef;
 use petgraph::visit::IntoEdgeReferences;
@@ -6,7 +6,7 @@ use rand::{prelude::SliceRandom, Rng};
 
 const MAX_CONNECTIONS: usize = 2;
 
-pub fn new() -> MapGraph {
+pub fn new() -> GraphResult {
   let mut rng = rand::thread_rng();
   let mut graph = StableGraph::<usize, usize>::new();
 
@@ -43,7 +43,7 @@ pub fn new() -> MapGraph {
     *nw = i + 1;
   }
 
-  MapGraph { graph, nodes: all_nodes }
+  (graph, all_nodes)
 }
 
 fn can_make_edge(

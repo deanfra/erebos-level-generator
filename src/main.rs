@@ -13,9 +13,8 @@ fn main() {
   let mut rng = rand::thread_rng();
   let mut templates = room_templates::RoomTemplates::new();
   let first_node = map_graph.nodes.get(0).unwrap();
-  let neighbour_map = graph::create_neighbour_map(&map_graph);
 
-  crawler::try_node_recursive(first_node, &map_graph, &neighbour_map, &mut map, &mut templates, &mut rng);
+  crawler::try_node_recursive(first_node, &map_graph, &mut map, &mut templates, &mut rng);
 
   // ---------- debug ------------
   // debug::print_er_diagram(&map_graph.graph, &map_graph.nodes);

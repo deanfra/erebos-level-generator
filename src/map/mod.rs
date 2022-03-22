@@ -40,10 +40,11 @@ pub fn add_or_update_room(map: &mut Map, node_idx: usize, room: Room) {
   let mut x = 1;
 
   for tile in room.tiles.iter() {
+    let in_range = idx <= map.tiles.len();
     // if this tile overlaps
-    if is_new_room && *tile != 0 && idx <= map.tiles.len() && map.tiles[idx] == 8 {
+    if is_new_room && *tile != 0 && in_range && map.tiles[idx] == 8 {
       map.tiles[idx] = 9; // 9 = clash
-    } else if *tile != 0 && idx <= map.tiles.len() {
+    } else if *tile != 0 && in_range {
       map.tiles[idx] = *tile;
     }
 

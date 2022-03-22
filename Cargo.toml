@@ -1,5 +1,5 @@
 [package]
-name = "eronicus-generator"
+name = "erebos-level-generator"
 version = "0.1.0"
 edition = "2021"
 

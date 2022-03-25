@@ -11,9 +11,11 @@ pub struct RoomTemplate {
   pub possible_doors_xy: DoorsXY,
   pub room_type: RoomType,
   pub tiles: Vec<u8>,
-  pub valid_combinations: HashMap<usize, Vec<(XY, u8, XY, u8, XY)>>,
+  pub valid_combinations: HashMap<usize, Vec<RoomCombination>>,
 }
 
+///
+pub type RoomCombination = (XY, u8, XY, u8, XY);
 /// Hashmap of each room template
 type RoomTemplateMap = HashMap<usize, RoomTemplate>;
 /// Params: Tiles with room places, x, y coordinates of the room
@@ -73,7 +75,7 @@ impl RoomTemplates {
   }
 }
 
-pub fn get_template(idx: &usize, rooms: &mut RoomTemplates) -> RoomTemplate {
+pub fn get(idx: &usize, rooms: &mut RoomTemplates) -> RoomTemplate {
   rooms.rooms.get(idx).unwrap().clone()
 }
 
@@ -84,6 +86,11 @@ fn calculate_combinations(templates: &mut RoomTemplateMap) {
   for (_, template_a) in templates.iter_mut() {
     // Try all templates
     for (tb_i, template_b) in templates_b.iter() {
+      // Create a placeholder array
+      if !template_a.valid_combinations.contains_key(tb_i) {
+        template_a.valid_combinations.insert(*tb_i, Vec::new());
+      }
+
       // For each door template A
       for (door_a_type, door_xys) in template_a.possible_doors_xy.iter() {
         // For each door position on each face
@@ -100,9 +107,6 @@ fn calculate_combinations(templates: &mut RoomTemplateMap) {
 
                 if let Some(combo) = template_a.valid_combinations.get_mut(tb_i) {
                   combo.push(combination);
-                } else {
-                  // Push the valid position combination of template a and template b (relative to a)
-                  template_a.valid_combinations.insert(*tb_i, Vec::from([combination]));
                 }
               }
             }

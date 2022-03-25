@@ -10,18 +10,19 @@ use petgraph::stable_graph::{NodeIndex, StableGraph};
 use rand::Rng;
 use std::collections::HashMap;
 
-type NeighbourMap = HashMap<usize, Vec<(NodeIndex<u32>, NodeIndex<u32>)>>;
+pub type NeighbourMap = HashMap<usize, Vec<(NodeIndex<u32>, NodeIndex<u32>)>>;
 pub type GraphResult = (StableGraph<usize, usize>, Vec<NodeIndex<u32>>);
 
 pub struct MapGraph {
   pub graph: StableGraph<usize, usize>,
   pub nodes: Vec<NodeIndex<u32>>,
-  pub neighbours: NeighbourMap,
+  pub neighbour_map: NeighbourMap,
 }
 
 pub fn random_graph() -> MapGraph {
   let mut rng = rand::thread_rng();
   let selection: u32 = rng.gen_range(1..8);
+  // let selection: u32 = 5;
 
   let (graph, nodes) = match selection {
     1 => {
@@ -79,9 +80,13 @@ pub fn random_graph() -> MapGraph {
     }
   };
 
-  let neighbours = create_neighbour_map((graph.clone(), nodes.clone()));
+  let neighbour_map = create_neighbour_map((graph.clone(), nodes.clone()));
 
-  MapGraph { graph, nodes, neighbours }
+  MapGraph {
+    graph,
+    nodes,
+    neighbour_map,
+  }
 }
 
 /// For each node, store the directional neighbours (incoming and outgoing)

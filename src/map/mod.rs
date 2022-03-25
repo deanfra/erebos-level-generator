@@ -1,6 +1,6 @@
 use super::{
   common::{xy_idx, XY},
-  debug,
+  debug, graph,
 };
 pub mod room;
 use room::{DoorsXY, Room, RoomType};
@@ -64,6 +64,7 @@ pub fn add_or_update_room(map: &mut Map, node_idx: usize, room: Room) {
   map.rooms.insert(node_idx, room);
 }
 
+/// Try and see if this valid position can fit on the map
 pub fn can_place_room(map: &Map, room: &mut Room, door_type: u8) -> bool {
   // start at x,y in the map
   let mut idx = xy_idx(room.x, room.y, map.width);
@@ -168,4 +169,10 @@ pub fn find_or_create_start_room(map: &mut Map, templates: &mut RoomTemplates, i
 
   let found_room = map.rooms.get(idx).unwrap_or(&start_room);
   found_room.clone()
+}
+
+pub fn centre_coordinates(room: &mut Room, map: &mut Map) -> (i32, i32) {
+  let x = (map.width / 2) - (room.template.w / 2);
+  let y = (map.height / 2) - (room.template.h / 2);
+  (x, y)
 }

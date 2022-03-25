@@ -49,6 +49,36 @@ pub fn print_map(tiles: Vec<u8>, width: i32) {
     }
   }
 }
+#[allow(dead_code)]
+pub fn print_map_numbers(tiles: Vec<u8>, width: i32) {
+  let mut x = 0;
+
+  for tile in tiles {
+    if tile == 0 {
+      // SPACE: grey
+      print!("  ");
+    } else if tile == 9 {
+      // CONFLICT: red
+      print!("\x1B[31mx\x1B[39m ");
+    } else if tile == 8 {
+      // BG: black
+      print!("\x1B[30m8\x1B[39m ");
+    } else if tile == 1 {
+      // WALL: grey white
+      print!("🀕 ");
+    } else {
+      // DOOR: blue
+      print!("\x1B[34m{}\x1B[39m ", tile);
+    }
+    // Move the coordinates
+    x += 1;
+    // end of the row, move down one and back to the left
+    if (x + 1) > width {
+      println!("");
+      x = 0;
+    }
+  }
+}
 
 #[allow(dead_code)]
 pub fn print_map_history(history: Vec<Vec<u8>>, width: i32) {

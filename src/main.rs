@@ -12,9 +12,11 @@ fn main() {
   let mut map = map::Map::new(100, 100);
   let mut rng = rand::thread_rng();
   let mut templates = room_templates::RoomTemplates::new();
-  let first_node = map_graph.nodes.get(0).unwrap();
 
-  crawler::try_node_recursive(first_node, &map_graph, &mut map, &mut templates, &mut rng);
+  for node in map_graph.nodes.iter() {
+    let mut chain = Vec::from([node.clone()]);
+    crawler::try_node_recursive(node, &map_graph, &mut map, &mut templates, &mut chain, &mut rng);
+  }
 
   // ---------- debug ------------
   // debug::print_er_diagram(&map_graph.graph, &map_graph.nodes);

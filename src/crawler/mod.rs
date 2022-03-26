@@ -37,17 +37,20 @@ pub fn try_node_recursive(
     map::add_or_update_room(map, node_a.index(), room_a.clone());
   }
 
+  // Sometimes nodes are not yet connected to the map, this attempts existing neighbours
   if is_detached {
-    println!("Room detached: {}, finding existing combination..", node_a.index());
     for (_, node_b, _) in neighbours.clone() {
       let is_existing_node = map.rooms.contains_key(&node_b.index());
-      println!("Node: {}, Existing: {}", &node_b.index(), is_existing_node);
+
+      if is_existing_node {
+        let mut chain = Vec::from([node_b.clone()]);
+        try_node_recursive(&node_b, map_graph, map, templates, &mut chain, rng);
+      }
     }
   }
 
   // For each node
   for (_, node_b, outbound) in &neighbours {
-    // Neighbours can go both ways
     let node_b_weight = weights.get(node_b.index()).unwrap();
     let room_b_type = if node_b_weight == weights.last().unwrap() {
       RoomType::Boss
@@ -65,13 +68,12 @@ pub fn try_node_recursive(
     template_idxs.shuffle(rng);
 
     // Loop through randomised rooms until we find one that can fit into the map
-    while !template_idxs.is_empty() && !room_added && !is_existing_node {
+    while !template_idxs.is_empty() && !room_added && !is_existing_node && !is_detached {
       let template_b_idx = template_idxs.pop().unwrap();
       // Get the B template of this room combination
       let mut room_b = Room::new(room_templates::get(&template_b_idx, templates));
 
-      // Filter out rooms that are designed to have minimum doors (eg: T shaped rooms = 3 minimum doors)
-      // NOTE: this has no guarantee, just a selection bias
+      // Prefer rooms that are designed to have minimum doors (eg: T shaped rooms = 3 minimum doors)
       let has_min_doors = room_b.template.min_doors <= (graph.edges(node_b.clone()).count() + 1) as u32;
       // Select Boss or Normal room based on node weight
       let room_is_correct_type = room_b.template.room_type == room_b_type;

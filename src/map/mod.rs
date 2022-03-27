@@ -65,7 +65,7 @@ pub fn add_or_update_room(map: &mut Map, node_idx: usize, room: Room) {
 }
 
 /// Try and see if this valid position can fit on the map
-pub fn can_place_room(map: &Map, room: &mut Room, door_type: u8) -> bool {
+pub fn can_place_room(map: &Map, room: &Room, door_type: u8) -> bool {
   // start at x,y in the map
   let mut idx = xy_idx(room.x, room.y, map.width);
   let mut x = 1;

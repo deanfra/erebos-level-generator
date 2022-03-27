@@ -78,7 +78,7 @@ pub type DoorConnections = HashMap<u8, Vec<DoorConnection>>;
 pub type DoorsXY = HashMap<u8, Vec<XY>>;
 
 /// Modify room_b's combination coordinates relative to room_a
-pub fn align_combination(room_a: &Room, room_b: &mut Room, combination: RoomCombination) -> () {
+pub fn align_room_b(room_a: &Room, room_b: &mut Room, combination: RoomCombination) -> Room {
   let ((room_b_x, room_b_y), _, _, door_b_type, _) = combination;
 
   let (x_offset, y_offset) = match door_b_type {
@@ -92,6 +92,8 @@ pub fn align_combination(room_a: &Room, room_b: &mut Room, combination: RoomComb
   // move room b to a valid connecting position
   room_b.x = room_a.x - (room_b_x + x_offset);
   room_b.y = room_a.y - (room_b_y + y_offset);
+
+  room_b.clone()
 }
 
 ///

@@ -11,9 +11,9 @@
 
 # Erebos Level Generator
 
-This app is an attempt at a graph-based rogue-like/lite level generator, heavily inspired by [this blog article](https://ondra.nepozitek.cz/blog/graph-based-dungeon-generator-basics-1/) by Ondřej Nepožitek.
+A Rust attempt at a graph-based rogue-like/lite level generator, heavily inspired by [this blog article](https://ondra.nepozitek.cz/blog/graph-based-dungeon-generator-basics-1/) by Ondřej Nepožitek.
 
-This is built to serve as a level generator for a Bevy based sidescroller project I am working on. Most roguelike dungeon generators focus on a single holistic map, but I want a more metroid-like map where paths and difficulty are on a room-to-room basis.
+This is built to serve as a level generator for a Bevy based sidescroller project I am working on. Most roguelike dungeon generators focus on a single holistic map, but I want a more metroid-like map where paths and difficulty are based on a directed graph with precalculated connections.
 
 ## Running
 ```
@@ -41,6 +41,8 @@ cargo run --release
 - [x] Start room + Boss room
 - [ ] Unit tests
 - [ ] Making this a crate
+- [ ] Distinctive areas
+- [ ] Portals/Stairs to different areas
 - [ ] Backtracking for more optimal connections
 
 
